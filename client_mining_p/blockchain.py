@@ -140,12 +140,19 @@ node_identifier = str(uuid4()).replace('-', '')
 blockchain = Blockchain()
 
 
-@app.route('/mine', methods=['GET'])
+@app.route('/mine', methods=['POST'])
 def mine():
     # We run the proof of work algorithm to get the next proof...
     last_block = blockchain.last_block
     last_proof = last_block['proof']
-    proof = blockchain.proof_of_work(last_proof)
+    req_data = request.get_json()
+    proof = req_data['proof']
+
+    if not blockchain.valid_proof(last_proof, proof):
+        response = {
+            'message': f'Invalid proof {proof}'
+        }
+        return jsonify(response), 200
 
     # We must receive a reward for finding the proof.
     # The sender is "0" to signify that this node has mine a new coin
