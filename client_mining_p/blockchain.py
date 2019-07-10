@@ -93,12 +93,12 @@ class Blockchain(object):
     @staticmethod
     def valid_proof(last_proof, proof):
         """
-        Validates the Proof:  Does hash(last_proof, proof) contain 4
+        Validates the Proof:  Does hash(last_proof, proof) contain 6
         leading zeroes?
         """
         guess = f'{last_proof}{proof}'.encode()
         guess_hash = hashlib.sha256(guess).hexdigest()
-        return guess_hash[:4] == "0000"
+        return guess_hash.startswith('000000')
 
     def valid_chain(self, chain):
         """
