@@ -81,8 +81,11 @@ class Blockchain(object):
         zeroes, where p is the previous p'
         - p is the previous proof, and p' is the new proof
         """
+        proof = 0
+        while self.valid_proof(last_proof, proof) is False:
+            proof += 1
 
-        pass
+        return proof
 
     @staticmethod
     def valid_proof(last_proof, proof):
