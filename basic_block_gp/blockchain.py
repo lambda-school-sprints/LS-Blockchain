@@ -93,8 +93,10 @@ class Blockchain(object):
         Validates the Proof:  Does hash(last_proof, proof) contain 4
         leading zeroes?
         """
-        # TODO
-        pass
+        guess = f'{last_proof}{proof}'.encode()
+        guess_hash = hashlib.sha256(guess).hexdigest()
+
+        return guess_hash.startswith('0000')
 
     def valid_chain(self, chain):
         """
