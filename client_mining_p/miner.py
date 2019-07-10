@@ -5,6 +5,25 @@ import sys
 
 
 # TODO: Implement functionality to search for a proof 
+def proof_is_valid(last_proof, proof):
+    guess = f'{last_proof}{proof}'.encode()
+    guess_hash = hashlib.sha256(guess).hexdigest()
+    return guess_hash.startswith('000000')
+
+
+def proof_of_work(last_proof):
+    """
+    Simple Proof of Work Algorithm
+    - Find a number p' such that hash(pp') contains 6 leading
+    zeroes, where p is the previous p'
+    - p is the previous proof, and p' is the new proof
+    """
+
+    proof = 0
+    while not proof_is_valid(last_proof, proof):
+        proof += 1
+
+    return proof
 
 
 if __name__ == '__main__':
