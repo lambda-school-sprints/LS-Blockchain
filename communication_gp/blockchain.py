@@ -50,6 +50,7 @@ class Blockchain(object):
         self.current_transactions = []
 
         self.chain.append(block)
+        self.broadcast_new_block(block)
         return block
 
     def new_transaction(self, sender, recipient, amount):
@@ -185,6 +186,14 @@ class Blockchain(object):
             return True
 
         return False
+
+    def broadcast_new_block(self, block):
+        for node in self.nodes:
+            response = requests.post(
+                f'http://{node}/block/new', json={'block': block})
+            if response.status_code != 200:
+                # TODO
+                pass
 
 
 # Instantiate our Node
