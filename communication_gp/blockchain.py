@@ -270,7 +270,7 @@ def full_chain():
     return jsonify(response), 200
 
 
-@app.route('/last_proof', methods=['GET'])
+@app.route('/last-proof', methods=['GET'])
 def last_proof():
     last_proof_value = blockchain.last_block.get('proof')
     response = {
