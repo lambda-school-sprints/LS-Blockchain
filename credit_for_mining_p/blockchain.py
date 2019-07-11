@@ -184,14 +184,14 @@ class Blockchain(object):
         :return: <bool> True if our chain was replaced, False if not
         """
 
-        neighbours = self.nodes
+        neighbors = self.nodes
         new_chain = None
 
         # We're only looking for chains longer than ours
         max_length = len(self.chain)
 
         # Grab and verify the chains from all the nodes in our network
-        for node in neighbours:
+        for node in neighbors:
             response = requests.get(f'http://{node}/chain')
 
             if response.status_code == 200:
@@ -217,12 +217,12 @@ class Blockchain(object):
         :param block: <Block> the block that has been mined and added to the 
         chain
         """
-        neighbours = self.nodes
+        neighbors = self.nodes
 
         post_data = {"block": block}
 
         # Grab and verify the chains from all the nodes in our network
-        for node in neighbours:
+        for node in neighbors:
             response = requests.post(f'http://{node}/block/new',
                                      json=post_data)
 
