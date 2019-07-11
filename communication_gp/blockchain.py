@@ -301,6 +301,33 @@ def register_nodes():
     return jsonify(response), 201
 
 
+@app.route('/block/new', methods=['POST'])
+def new_block():
+    values = request.get_json()
+    new_block = values.get('block')
+
+    if not new_block:
+        return 'Missing block', 400
+
+    # validate sender on approved node list
+    # validate block - index and hash
+
+    last_block = blockchain.last_block
+    index_is_valid = new_block['index'] == last_block['index'] + 1
+    hash_is_valid = new_block['previous_hash'] == blockchain.hash(last_block)
+    proof_is_valid = blockchain.valid_proof(
+        last_block['proof'], new_block['proof'])
+
+    if index_is_valid and hash_is_valid and proof_is_valid:
+        blockchain.chain.append(new_block)
+        return 'Block accepted', 200
+
+    else:
+        # TODO - respond with error
+        # TODO - rewuest chain from peers, check for consensus
+        return 'Block rejected', 200
+
+
 @app.route('/nodes/resolve', methods=['GET'])
 def consensus():
     replaced = blockchain.resolve_conflicts()
