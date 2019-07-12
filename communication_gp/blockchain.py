@@ -16,7 +16,18 @@ class Blockchain(object):
         self.current_transactions = []
         self.nodes = set()
 
-        self.new_block(previous_hash=1, proof=100)
+        self.create_genesis_block()
+
+    def create_genesis_block(self):
+        block = {
+            'index': 1,
+            'timestamp': 0,
+            'transactions': self.current_transactions,
+            'proof': 99,
+            'previous_hash': 1,
+        }
+
+        self.chain.append(block)
 
     def new_block(self, proof, previous_hash=None):
         """
@@ -39,6 +50,7 @@ class Blockchain(object):
         self.current_transactions = []
 
         self.chain.append(block)
+        self.broadcast_new_block(block)
         return block
 
     def new_transaction(self, sender, recipient, amount):
@@ -175,6 +187,14 @@ class Blockchain(object):
 
         return False
 
+    def broadcast_new_block(self, block):
+        for node in self.nodes:
+            response = requests.post(
+                f'http://{node}/block/new', json={'block': block})
+            if response.status_code != 200:
+                # TODO
+                pass
+
 
 # Instantiate our Node
 app = Flask(__name__)
@@ -250,7 +270,7 @@ def full_chain():
     return jsonify(response), 200
 
 
-@app.route('/last_proof', methods=['GET'])
+@app.route('/last-proof', methods=['GET'])
 def last_proof():
     last_proof_value = blockchain.last_block.get('proof')
     response = {
@@ -279,6 +299,33 @@ def register_nodes():
         'total_nodes': list(blockchain.nodes),
     }
     return jsonify(response), 201
+
+
+@app.route('/block/new', methods=['POST'])
+def new_block():
+    values = request.get_json()
+    new_block = values.get('block')
+
+    if not new_block:
+        return 'Missing block', 400
+
+    # validate sender on approved node list
+    # validate block - index and hash
+
+    last_block = blockchain.last_block
+    index_is_valid = new_block['index'] == last_block['index'] + 1
+    hash_is_valid = new_block['previous_hash'] == blockchain.hash(last_block)
+    proof_is_valid = blockchain.valid_proof(
+        last_block['proof'], new_block['proof'])
+
+    if index_is_valid and hash_is_valid and proof_is_valid:
+        blockchain.chain.append(new_block)
+        return 'Block accepted', 200
+
+    else:
+        # TODO - respond with error
+        # TODO - rewuest chain from peers, check for consensus
+        return 'Block rejected', 200
 
 
 @app.route('/nodes/resolve', methods=['GET'])
